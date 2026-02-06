@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: only light;
+}
+
+body {
+  @apply bg-stable-sand text-stable-ink;
+  font-family: "Fira Sans", "Helvetica Neue", Arial, sans-serif;
+}
+
+.stable-card {
+  @apply rounded-lg bg-white/90 shadow-stable backdrop-blur;
+}
+
+.stable-input {
+  @apply w-full rounded-md border border-stable-ink/20 bg-white px-3 py-2 text-base shadow-sm outline-none focus:border-stable-saddle focus:ring-2 focus:ring-stable-hay;
+}
+
+.stable-button {
+  @apply inline-flex items-center justify-center rounded-md bg-stable-forest px-4 py-2 text-sm font-semibold uppercase tracking-wide text-white shadow hover:bg-stable-ink focus:outline-none focus:ring-2 focus:ring-stable-hay;
+}
+
+.stable-button-secondary {
+  @apply inline-flex items-center justify-center rounded-md border border-stable-ink/20 bg-white px-4 py-2 text-sm font-semibold uppercase tracking-wide text-stable-ink shadow hover:bg-stable-ink/5 focus:outline-none focus:ring-2 focus:ring-stable-hay;
+}
