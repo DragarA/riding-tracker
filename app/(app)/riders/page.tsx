@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { MonthSelector } from "@/components/month-selector";
 import { SectionHeader } from "@/components/section-header";
 
@@ -102,6 +102,27 @@ export default function RidersPage() {
       setNewName("");
       setNewRate("0");
       setShowModal(false);
+    }
+  };
+
+  const handleDeleteRider = async (clientId: string) => {
+    setRateStatus(null);
+    const response = await fetch(`/api/clients/${clientId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ active: false })
+    });
+
+    if (!response.ok) {
+      setRateStatus("Unable to delete rider.");
+      return;
+    }
+
+    setClients((prev) => prev.filter((client) => client.id !== clientId));
+    setRateStatus("Rider removed.");
+    if (selectedId === clientId) {
+      setSelectedId("");
+      setRate("0");
     }
   };
 
@@ -232,21 +253,32 @@ export default function RidersPage() {
               <li key={rider.id} className="border-b border-stable-ink/10 pb-3">
                 <div className="flex items-center justify-between gap-3">
                   <span className="font-semibold">{rider.name}</span>
-                  <button
-                    type="button"
-                    className="stable-button-secondary flex items-center gap-1 text-xs"
-                    onClick={() => {
-                      setEditingRiderId((prev) => (prev === rider.id ? null : rider.id));
-                      setRateEdits((prev) => ({
-                        ...prev,
-                        [rider.id]: prev[rider.id] ?? String(rider.defaultRate)
-                      }));
-                    }}
-                    aria-label={`Edit rate for ${rider.name}`}
-                  >
-                    <Pencil size={14} />
-                    Edit
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      className="stable-button-secondary flex items-center gap-1 text-xs"
+                      onClick={() => {
+                        setEditingRiderId((prev) => (prev === rider.id ? null : rider.id));
+                        setRateEdits((prev) => ({
+                          ...prev,
+                          [rider.id]: prev[rider.id] ?? String(rider.defaultRate)
+                        }));
+                      }}
+                      aria-label={`Edit rate for ${rider.name}`}
+                    >
+                      <Pencil size={14} />
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      className="stable-button-secondary flex items-center gap-1 text-xs"
+                      onClick={() => handleDeleteRider(rider.id)}
+                      aria-label={`Delete ${rider.name}`}
+                    >
+                      <Trash2 size={14} />
+                      Delete
+                    </button>
+                  </div>
                 </div>
                 {editingRiderId === rider.id ? (
                   <div className="mt-2 flex items-center gap-2">

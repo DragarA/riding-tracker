@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { MonthSelector } from "@/components/month-selector";
 import { SectionHeader } from "@/components/section-header";
+import { Trash2 } from "lucide-react";
 
 interface Client {
   id: string;
@@ -139,6 +140,23 @@ export default function BoardersPage() {
     }
   };
 
+  const handleDeleteBoarder = async (clientId: string) => {
+    setStatus(null);
+    const response = await fetch(`/api/clients/${clientId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ active: false })
+    });
+
+    if (!response.ok) {
+      setStatus("Unable to delete boarder.");
+      return;
+    }
+
+    setClients((prev) => prev.filter((client) => client.id !== clientId));
+    setStatus("Boarder removed.");
+  };
+
   const boarders = clients.filter((client) => client.type === "BOARDER");
 
   return (
@@ -170,12 +188,13 @@ export default function BoardersPage() {
                 <th className="pb-3">Additional Fees</th>
                 <th className="pb-3">Notes</th>
                 <th className="pb-3">Status</th>
+                <th className="pb-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {boarders.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-6 text-center text-sm text-stable-ink/60">
+                  <td colSpan={6} className="py-6 text-center text-sm text-stable-ink/60">
                     No boarders added yet.
                   </td>
                 </tr>
@@ -201,7 +220,6 @@ export default function BoardersPage() {
                       <td className="py-3">
                         <input
                           type="number"
-                          min="0"
                           step="1"
                           className="stable-input"
                           value={entry?.additionalFees ?? 0}
@@ -220,6 +238,16 @@ export default function BoardersPage() {
                       </td>
                       <td className="py-3 text-sm">
                         {isBilled ? "Already billed" : "Pending"}
+                      </td>
+                      <td className="py-3 text-right">
+                        <button
+                          type="button"
+                          className="stable-button-secondary inline-flex items-center gap-1 text-xs"
+                          onClick={() => handleDeleteBoarder(client.id)}
+                        >
+                          <Trash2 size={14} />
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   );
