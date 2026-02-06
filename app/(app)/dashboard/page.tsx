@@ -83,6 +83,10 @@ export default function DashboardPage() {
   }, [lessons, boarding]);
 
   const handleDelete = async (row: ActivityRow) => {
+    const confirmed = window.confirm(`Delete this ${row.type.toLowerCase()} entry for ${row.name}?`);
+    if (!confirmed) {
+      return;
+    }
     setStatus(null);
     const endpoint = row.type === "Lesson" ? `/api/lessons/${row.id}` : `/api/boarding/${row.id}`;
     const response = await fetch(endpoint, { method: "DELETE" });

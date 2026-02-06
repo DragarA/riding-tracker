@@ -106,6 +106,13 @@ export default function RidersPage() {
   };
 
   const handleDeleteRider = async (clientId: string) => {
+    const rider = riders.find((client) => client.id === clientId);
+    const confirmed = window.confirm(
+      `Delete ${rider?.name ?? "this rider"}? Existing lesson records will remain.`
+    );
+    if (!confirmed) {
+      return;
+    }
     setRateStatus(null);
     const response = await fetch(`/api/clients/${clientId}`, {
       method: "PATCH",

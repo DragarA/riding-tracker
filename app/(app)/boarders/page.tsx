@@ -141,6 +141,13 @@ export default function BoardersPage() {
   };
 
   const handleDeleteBoarder = async (clientId: string) => {
+    const boarder = boarders.find((client) => client.id === clientId);
+    const confirmed = window.confirm(
+      `Delete ${boarder?.name ?? "this boarder"}? Existing boarding records will remain.`
+    );
+    if (!confirmed) {
+      return;
+    }
     setStatus(null);
     const response = await fetch(`/api/clients/${clientId}`, {
       method: "PATCH",
