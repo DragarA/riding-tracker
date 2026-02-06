@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Pencil } from "lucide-react";
 import { MonthSelector } from "@/components/month-selector";
 import { SectionHeader } from "@/components/section-header";
 
@@ -26,6 +27,7 @@ export default function RidersPage() {
   const [newRate, setNewRate] = useState("0");
   const [rateEdits, setRateEdits] = useState<Record<string, string>>({});
   const [rateStatus, setRateStatus] = useState<string | null>(null);
+  const [editingRiderId, setEditingRiderId] = useState<string | null>(null);
 
   const riders = useMemo(() => clients.filter((client) => client.type === "RIDER"), [clients]);
 
@@ -127,6 +129,12 @@ export default function RidersPage() {
     const updated = await response.json();
     setClients((prev) => prev.map((client) => (client.id === clientId ? updated : client)));
     setRateStatus("Rate updated.");
+    setEditingRiderId(null);
+    setRateEdits((prev) => {
+      const next = { ...prev };
+      delete next[clientId];
+      return next;
+    });
   };
 
   return (
@@ -226,23 +234,51 @@ export default function RidersPage() {
                   <span className="font-semibold">{rider.name}</span>
                   <button
                     type="button"
-                    className="stable-button-secondary text-xs"
-                    onClick={() => handleSaveRate(rider.id)}
+                    className="stable-button-secondary flex items-center gap-1 text-xs"
+                    onClick={() => {
+                      setEditingRiderId((prev) => (prev === rider.id ? null : rider.id));
+                      setRateEdits((prev) => ({
+                        ...prev,
+                        [rider.id]: prev[rider.id] ?? String(rider.defaultRate)
+                      }));
+                    }}
+                    aria-label={`Edit rate for ${rider.name}`}
                   >
-                    Save
+                    <Pencil size={14} />
+                    Edit
                   </button>
                 </div>
-                <div className="mt-2 flex items-center gap-2">
-                  <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    className="stable-input"
-                    value={rateEdits[rider.id] ?? rider.defaultRate}
-                    onChange={(event) => handleRateEdit(rider.id, event.target.value)}
-                  />
-                  <span className="text-xs text-stable-ink/60">$/hr</span>
-                </div>
+                {editingRiderId === rider.id ? (
+                  <div className="mt-2 flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      className="stable-input"
+                      value={rateEdits[rider.id] ?? rider.defaultRate}
+                      onChange={(event) => handleRateEdit(rider.id, event.target.value)}
+                    />
+                    <span className="text-xs text-stable-ink/60">$/hr</span>
+                    <button
+                      type="button"
+                      className="stable-button-secondary text-xs"
+                      onClick={() => handleSaveRate(rider.id)}
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      className="stable-button-secondary text-xs"
+                      onClick={() => setEditingRiderId(null)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <p className="mt-2 text-sm text-stable-ink/70">
+                    ${rider.defaultRate.toFixed(2)} / hr
+                  </p>
+                )}
               </li>
             ))}
           </ul>

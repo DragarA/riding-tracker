@@ -63,7 +63,7 @@ export default function DashboardPage() {
   }, [lessons, boarding]);
 
   const activityRows = useMemo<ActivityRow[]>(() => {
-    const lessonRows = lessons.map((entry) => ({
+    const lessonRows: ActivityRow[] = lessons.map((entry) => ({
       id: entry.id,
       name: entry.client.name,
       hours: entry.hours,
@@ -71,7 +71,7 @@ export default function DashboardPage() {
       type: "Lesson"
     }));
 
-    const boardingRows = boarding.map((entry) => ({
+    const boardingRows: ActivityRow[] = boarding.map((entry) => ({
       id: entry.id,
       name: entry.client.name,
       hours: null,
