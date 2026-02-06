@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/session";
 
+interface BoardingEntry {
+  clientId: string;
+  month: number;
+  year: number;
+  baseRateAtTime?: number;
+  additionalFees?: number;
+  notes?: string | null;
+}
+
 export async function GET(request: Request) {
   try {
     await requireSession();
@@ -29,10 +38,10 @@ export async function POST(request: Request) {
   try {
     await requireSession();
     const body = await request.json();
-    const entries = Array.isArray(body.entries) ? body.entries : [];
+    const entries: BoardingEntry[] = Array.isArray(body.entries) ? body.entries : [];
 
     const created = await prisma.$transaction(
-      entries.map((entry) => {
+      entries.map((entry: BoardingEntry) => {
         const baseRateAtTime = Number(entry.baseRateAtTime ?? 0);
         const additionalFees = Number(entry.additionalFees ?? 0);
         const totalOwed = Number((baseRateAtTime + additionalFees).toFixed(2));

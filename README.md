@@ -31,7 +31,7 @@ Production-ready ranch web app for tracking riding lessons and boarding fees. Bu
 
 ## Scripts
 - `npm run dev` — start local dev server
-- `npm run build` — generate Prisma client, push schema, build app
+- `npm run build` — generate Prisma client, build app
 - `npm run start` — start production server
 - `npm run lint` — run Next.js lint
 - `npm run prisma:migrate` — run Prisma dev migrations
@@ -41,7 +41,7 @@ Production-ready ranch web app for tracking riding lessons and boarding fees. Bu
 ## Database
 - Local development can use a local Postgres instance.
 - Hosted Postgres (Neon/Vercel) works by setting `DATABASE_URL`.
-- Build step runs `prisma generate && prisma db push && next build`.
+- Build step runs `prisma generate && next build`.
 
 ## Deployment (Vercel + Neon)
 1. Create a Postgres database in Vercel Storage (Neon).
@@ -51,5 +51,5 @@ Production-ready ranch web app for tracking riding lessons and boarding fees. Bu
 5. Deploy.
 
 ## Notes
-- `prisma db push` runs during build to keep schema in sync. For production migrations later, switch to `prisma migrate deploy`.
+- For production migrations, use `prisma migrate deploy`.
 - The first admin account is created at `/register`.
