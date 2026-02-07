@@ -170,12 +170,24 @@ export default function RidersPage() {
       <SectionHeader
         title="Rider Input"
         subtitle="Log lesson hours by month and capture the rate at time of service."
-        action={<MonthSelector month={month} year={year} onChange={(m, y) => { setMonth(m); setYear(y); }} />}
       />
 
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <form onSubmit={handleSubmit} className="stable-card p-6">
+      <div className="grid items-start gap-6 lg:grid-cols-[2fr_1fr]">
+        <form onSubmit={handleSubmit} className="stable-card self-start p-6">
           <div className="flex flex-col gap-4">
+            <div className="rounded-md bg-stable-hay/20 p-4">
+              <p className="text-xs uppercase tracking-wide text-stable-saddle">Billing Month</p>
+              <div className="mt-3">
+                <MonthSelector
+                  month={month}
+                  year={year}
+                  onChange={(m, y) => {
+                    setMonth(m);
+                    setYear(y);
+                  }}
+                />
+              </div>
+            </div>
             <label className="text-sm font-semibold">
               Rider
               <div className="mt-2 flex gap-2">
@@ -231,14 +243,14 @@ export default function RidersPage() {
               />
               {selectedRider ? (
                 <p className="mt-2 text-xs text-stable-ink/60">
-                  Default rate: ${selectedRider.defaultRate.toFixed(2)}
+                  Default rate: €{selectedRider.defaultRate.toFixed(2)}
                 </p>
               ) : null}
             </label>
 
             <div className="rounded-md bg-stable-hay/20 p-4">
               <p className="text-xs uppercase tracking-wide text-stable-saddle">Auto Calculation</p>
-              <p className="mt-2 text-xl font-semibold">${computedTotal.toFixed(2)}</p>
+              <p className="mt-2 text-xl font-semibold">€{computedTotal.toFixed(2)}</p>
             </div>
 
             {status ? <p className="text-sm text-stable-forest">{status}</p> : null}
@@ -255,72 +267,74 @@ export default function RidersPage() {
             Active riders: {riders.length}
           </p>
           {rateStatus ? <p className="mt-2 text-xs text-stable-forest">{rateStatus}</p> : null}
-          <ul className="mt-4 space-y-2 text-sm">
-            {riders.map((rider) => (
-              <li key={rider.id} className="border-b border-stable-ink/10 pb-3">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="font-semibold">{rider.name}</span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      className="stable-button-secondary flex items-center gap-1 text-xs"
-                      onClick={() => {
-                        setEditingRiderId((prev) => (prev === rider.id ? null : rider.id));
-                        setRateEdits((prev) => ({
-                          ...prev,
-                          [rider.id]: prev[rider.id] ?? String(rider.defaultRate)
-                        }));
-                      }}
-                      aria-label={`Edit rate for ${rider.name}`}
-                    >
-                      <Pencil size={14} />
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      className="stable-button-secondary flex items-center gap-1 text-xs"
-                      onClick={() => handleDeleteRider(rider.id)}
-                      aria-label={`Delete ${rider.name}`}
-                    >
-                      <Trash2 size={14} />
-                      Delete
-                    </button>
+          <div className="mt-4 max-h-[60vh] overflow-y-auto">
+            <ul className="space-y-2 text-sm">
+              {riders.map((rider) => (
+                <li key={rider.id} className="border-b border-stable-ink/10 pb-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-semibold">{rider.name}</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        className="stable-button-secondary flex items-center gap-1 text-xs"
+                        onClick={() => {
+                          setEditingRiderId((prev) => (prev === rider.id ? null : rider.id));
+                          setRateEdits((prev) => ({
+                            ...prev,
+                            [rider.id]: prev[rider.id] ?? String(rider.defaultRate)
+                          }));
+                        }}
+                        aria-label={`Edit rate for ${rider.name}`}
+                      >
+                        <Pencil size={14} />
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="stable-button-secondary flex items-center gap-1 text-xs"
+                        onClick={() => handleDeleteRider(rider.id)}
+                        aria-label={`Delete ${rider.name}`}
+                      >
+                        <Trash2 size={14} />
+                        Delete
+                      </button>
+                    </div>
                   </div>
-                </div>
-                {editingRiderId === rider.id ? (
-                  <div className="mt-2 flex items-center gap-2">
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      className="stable-input"
-                      value={rateEdits[rider.id] ?? rider.defaultRate}
-                      onChange={(event) => handleRateEdit(rider.id, event.target.value)}
-                    />
-                    <span className="text-xs text-stable-ink/60">$/hr</span>
-                    <button
-                      type="button"
-                      className="stable-button-secondary text-xs"
-                      onClick={() => handleSaveRate(rider.id)}
-                    >
-                      Save
-                    </button>
-                    <button
-                      type="button"
-                      className="stable-button-secondary text-xs"
-                      onClick={() => setEditingRiderId(null)}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <p className="mt-2 text-sm text-stable-ink/70">
-                    ${rider.defaultRate.toFixed(2)} / hr
-                  </p>
-                )}
-              </li>
-            ))}
-          </ul>
+                  {editingRiderId === rider.id ? (
+                    <div className="mt-2 flex items-center gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        className="stable-input"
+                        value={rateEdits[rider.id] ?? rider.defaultRate}
+                        onChange={(event) => handleRateEdit(rider.id, event.target.value)}
+                      />
+                    <span className="text-xs text-stable-ink/60">€/hr</span>
+                      <button
+                        type="button"
+                        className="stable-button-secondary text-xs"
+                        onClick={() => handleSaveRate(rider.id)}
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        className="stable-button-secondary text-xs"
+                        onClick={() => setEditingRiderId(null)}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-sm text-stable-ink/70">
+                      €{rider.defaultRate.toFixed(2)} / hr
+                    </p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
 

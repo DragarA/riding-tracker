@@ -33,6 +33,7 @@ model LessonLog {
   totalOwed  Float
   month      Int
   year       Int
+  paid       Boolean  @default(false)
   client     Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
 }
@@ -46,8 +47,17 @@ model BoardingLog {
   additionalFees  Float
   notes           String?
   totalOwed       Float
+  paid            Boolean  @default(false)
   client          Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   createdAt       DateTime @default(now())
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  date        DateTime
+  description String
+  cost        Float
+  createdAt   DateTime @default(now())
 }
 
 model User {

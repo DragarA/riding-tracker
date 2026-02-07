@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
+    if (process.env.ALLOW_REGISTRATION !== "true") {
+      return NextResponse.json({ error: "Registration disabled" }, { status: 403 });
+    }
+
     const body = await request.json();
     const email = String(body.email || "").toLowerCase();
     const password = String(body.password || "");

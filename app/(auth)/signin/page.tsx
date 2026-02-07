@@ -5,6 +5,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 
 export default function SignInPage() {
+  const registrationEnabled = process.env.NEXT_PUBLIC_ALLOW_REGISTRATION === "true";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -58,11 +59,13 @@ export default function SignInPage() {
             Enter Console
           </button>
         </form>
-        <div className="mt-6 text-center text-sm">
-          <Link href="/register" className="text-stable-saddle underline">
-            Need an admin account? Register here.
-          </Link>
-        </div>
+        {registrationEnabled ? (
+          <div className="mt-6 text-center text-sm">
+            <Link href="/register" className="text-stable-saddle underline">
+              Need an admin account? Register here.
+            </Link>
+          </div>
+        ) : null}
       </div>
     </div>
   );

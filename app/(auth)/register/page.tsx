@@ -5,6 +5,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
+  const registrationEnabled = process.env.NEXT_PUBLIC_ALLOW_REGISTRATION === "true";
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -15,6 +16,11 @@ export default function RegisterPage() {
     event.preventDefault();
     setError(null);
     setSuccess(null);
+
+    if (!registrationEnabled) {
+      setError("Registration is disabled. Contact your admin for access.");
+      return;
+    }
 
     const response = await fetch("/api/register", {
       method: "POST",
@@ -41,45 +47,56 @@ export default function RegisterPage() {
       <div className="stable-card w-full max-w-md p-8">
         <p className="text-xs uppercase tracking-[0.3em] text-stable-saddle">Stable Manager</p>
         <h1 className="mt-2 text-2xl font-semibold">Create Admin</h1>
-        <p className="mt-2 text-sm text-stable-ink/70">
-          Create the first ranch admin account to manage riders and boarders.
-        </p>
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          <label className="block text-sm font-semibold">
-            Name
-            <input
-              type="text"
-              className="stable-input mt-2"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-            />
-          </label>
-          <label className="block text-sm font-semibold">
-            Email
-            <input
-              type="email"
-              className="stable-input mt-2"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-            />
-          </label>
-          <label className="block text-sm font-semibold">
-            Password
-            <input
-              type="password"
-              className="stable-input mt-2"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              required
-            />
-          </label>
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
-          {success ? <p className="text-sm text-stable-forest">{success}</p> : null}
-          <button type="submit" className="stable-button w-full">
-            Create Account
-          </button>
-        </form>
+        {registrationEnabled ? (
+          <>
+            <p className="mt-2 text-sm text-stable-ink/70">
+              Create the first ranch admin account to manage riders and boarders.
+            </p>
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              <label className="block text-sm font-semibold">
+                Name
+                <input
+                  type="text"
+                  className="stable-input mt-2"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                />
+              </label>
+              <label className="block text-sm font-semibold">
+                Email
+                <input
+                  type="email"
+                  className="stable-input mt-2"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  required
+                />
+              </label>
+              <label className="block text-sm font-semibold">
+                Password
+                <input
+                  type="password"
+                  className="stable-input mt-2"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  required
+                />
+              </label>
+              {error ? <p className="text-sm text-red-600">{error}</p> : null}
+              {success ? <p className="text-sm text-stable-forest">{success}</p> : null}
+              <button type="submit" className="stable-button w-full">
+                Create Account
+              </button>
+            </form>
+          </>
+        ) : (
+          <>
+            <p className="mt-2 text-sm text-stable-ink/70">
+              Registration is currently disabled. Contact your admin for access.
+            </p>
+            {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
+          </>
+        )}
         <div className="mt-6 text-center text-sm">
           <Link href="/signin" className="text-stable-saddle underline">
             Back to sign in.

@@ -14,3 +14,23 @@ export async function DELETE(
     return NextResponse.json({ error: "Unable to delete boarding entry" }, { status: 400 });
   }
 }
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await requireSession();
+    const body = await request.json();
+    const boarding = await prisma.boardingLog.update({
+      where: { id: params.id },
+      data: {
+        paid: body.paid !== undefined ? Boolean(body.paid) : undefined
+      }
+    });
+    return NextResponse.json(boarding);
+  } catch (error) {
+    console.error("Boarding update failed:", error);
+    return NextResponse.json({ error: "Unable to update boarding" }, { status: 400 });
+  }
+}

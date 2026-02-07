@@ -184,9 +184,9 @@ export default function BoardersPage() {
       <div className="stable-card p-6">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <h3 className="text-lg font-semibold">Monthly Boarders</h3>
-          <p className="text-sm text-stable-ink/70">Projected: ${totalProjected.toFixed(2)}</p>
+          <p className="text-sm text-stable-ink/70">Projected: €{totalProjected.toFixed(2)}</p>
         </div>
-        <div className="mt-4 overflow-x-auto">
+        <div className="mt-4 max-h-[60vh] overflow-x-auto overflow-y-auto">
           <table className="w-full text-left text-sm">
             <thead className="text-xs uppercase tracking-wide text-stable-ink/60">
               <tr>

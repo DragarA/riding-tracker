@@ -45,7 +45,8 @@ export async function POST(request: Request) {
         rateAtTime,
         totalOwed,
         month: resolvedMonth,
-        year: resolvedYear
+        year: resolvedYear,
+        paid: false
       },
       include: { client: true }
     });

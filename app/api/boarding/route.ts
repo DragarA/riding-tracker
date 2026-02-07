@@ -53,7 +53,8 @@ export async function POST(request: Request) {
             baseRateAtTime,
             additionalFees,
             notes: entry.notes || null,
-            totalOwed
+            totalOwed,
+            paid: false
           },
           include: { client: true }
         });
