@@ -4,11 +4,12 @@ import { requireSession } from "@/lib/session";
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await requireSession();
-    await prisma.expense.delete({ where: { id: params.id } });
+    const { id } = await params;
+    await prisma.expense.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch (error) {
     return NextResponse.json({ error: "Unable to delete expense" }, { status: 400 });

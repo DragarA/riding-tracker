@@ -1,6 +1,18 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-stable-ink: #1d1a16;
+  --color-stable-sand: #f6f0e6;
+  --color-stable-saddle: #8a5b2e;
+  --color-stable-hay: #d9b469;
+  --color-stable-forest: #2f4b3a;
+
+  --radius-lg: 0.85rem;
+  --radius-md: 0.6rem;
+  --radius-sm: 0.35rem;
+
+  --shadow-stable: 0 18px 50px -25px rgba(29, 26, 22, 0.35);
+}
 
 :root {
   color-scheme: only light;

@@ -16,12 +16,13 @@ export default function SignInPage() {
     const result = await signIn("credentials", {
       email,
       password,
-      redirect: true,
-      callbackUrl: "/dashboard"
+      redirect: false
     });
 
     if (result?.error) {
       setError("Invalid email or password.");
+    } else {
+      window.location.href = "/dashboard";
     }
   };
 
