@@ -30,7 +30,6 @@ export async function PATCH(
     });
     return NextResponse.json(boarding);
   } catch (error) {
-    console.error("Boarding update failed:", error);
     return NextResponse.json({ error: "Unable to update boarding" }, { status: 400 });
   }
 }
