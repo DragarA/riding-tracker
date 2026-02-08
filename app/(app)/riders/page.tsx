@@ -315,7 +315,7 @@ export default function RidersPage() {
             Active riders: {riders.length}
           </p>
           {rateStatus ? <p className="mt-2 text-xs text-stable-forest">{rateStatus}</p> : null}
-          <div className="mt-4 max-h-[60vh] overflow-y-auto">
+          <div className="mt-4">
             <ul className="space-y-2 text-sm">
               {riders.map((rider) => (
                 <li key={rider.id} className="border-b border-stable-ink/10 pb-3">

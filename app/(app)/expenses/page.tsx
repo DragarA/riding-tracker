@@ -193,7 +193,7 @@ export default function ExpensesPage() {
             <h3 className="text-lg font-semibold">Monthly Expenses</h3>
             <p className="text-sm text-stable-ink/70">Total: €{totalExpenses.toFixed(2)}</p>
           </div>
-          <div className="mt-4 max-h-[60vh] overflow-x-auto overflow-y-auto">
+        <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="text-xs uppercase tracking-wide text-stable-ink/60">
                 <tr>

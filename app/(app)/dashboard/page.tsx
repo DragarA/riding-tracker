@@ -265,7 +265,7 @@ export default function DashboardPage() {
           </div>
         </div>
         {status ? <p className="mt-2 text-xs text-stable-forest">{status}</p> : null}
-        <div className="mt-4 max-h-[60vh] overflow-x-auto overflow-y-auto">
+        <div className="mt-4 overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="text-xs uppercase tracking-wide text-stable-ink/60">
               <tr>
