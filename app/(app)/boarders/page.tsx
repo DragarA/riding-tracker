@@ -35,6 +35,37 @@ export default function BoardersPage() {
   const [showModal, setShowModal] = useState(false);
   const [newName, setNewName] = useState("");
   const [newRate, setNewRate] = useState("0");
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("shared-month-year");
+    if (!saved) {
+      setFiltersLoaded(true);
+      return;
+    }
+    try {
+      const parsed = JSON.parse(saved);
+      const savedMonth = Number(parsed?.month);
+      const savedYear = Number(parsed?.year);
+      if (Number.isFinite(savedMonth) && Number.isFinite(savedYear)) {
+        setMonth(savedMonth);
+        setYear(savedYear);
+      }
+    } catch {
+      // ignore invalid storage
+    }
+    setFiltersLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!filtersLoaded) {
+      return;
+    }
+    window.localStorage.setItem(
+      "shared-month-year",
+      JSON.stringify({ month, year })
+    );
+  }, [month, year, filtersLoaded]);
 
   useEffect(() => {
     const load = async () => {

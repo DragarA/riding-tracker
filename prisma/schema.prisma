@@ -29,6 +29,7 @@ model LessonLog {
   clientId   String
   hours      Float
   rateAtTime Float
+  terrainRides Int    @default(0)
   totalOwed  Float
   month      Int
   year       Int

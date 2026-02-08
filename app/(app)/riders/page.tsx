@@ -17,6 +17,7 @@ export default function RidersPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedId, setSelectedId] = useState<string>("");
   const [hours, setHours] = useState("1");
+  const [terrainRides, setTerrainRides] = useState("0");
   const today = new Date();
   const [month, setMonth] = useState(today.getMonth() + 1);
   const [year, setYear] = useState(today.getFullYear());
@@ -28,6 +29,37 @@ export default function RidersPage() {
   const [rateEdits, setRateEdits] = useState<Record<string, string>>({});
   const [rateStatus, setRateStatus] = useState<string | null>(null);
   const [editingRiderId, setEditingRiderId] = useState<string | null>(null);
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("shared-month-year");
+    if (!saved) {
+      setFiltersLoaded(true);
+      return;
+    }
+    try {
+      const parsed = JSON.parse(saved);
+      const savedMonth = Number(parsed?.month);
+      const savedYear = Number(parsed?.year);
+      if (Number.isFinite(savedMonth) && Number.isFinite(savedYear)) {
+        setMonth(savedMonth);
+        setYear(savedYear);
+      }
+    } catch {
+      // ignore invalid storage
+    }
+    setFiltersLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!filtersLoaded) {
+      return;
+    }
+    window.localStorage.setItem(
+      "shared-month-year",
+      JSON.stringify({ month, year })
+    );
+  }, [month, year, filtersLoaded]);
 
   const riders = useMemo(() => clients.filter((client) => client.type === "RIDER"), [clients]);
 
@@ -50,7 +82,8 @@ export default function RidersPage() {
   }, [selectedId]);
 
   const selectedRider = riders.find((client) => client.id === selectedId);
-  const computedTotal = Number(hours || 0) * Number(rate || 0);
+  const terrainCount = Math.max(0, Math.trunc(Number(terrainRides || 0)));
+  const computedTotal = Number(hours || 0) * Number(rate || 0) + terrainCount * 50;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -68,7 +101,8 @@ export default function RidersPage() {
         month,
         year,
         hours: Number(hours),
-        rateAtTime: Number(rate)
+        rateAtTime: Number(rate),
+        terrainRides: terrainCount
       })
     });
 
@@ -79,6 +113,7 @@ export default function RidersPage() {
 
     setStatus("Lesson logged.");
     setHours("1");
+    setTerrainRides("0");
   };
 
   const handleAddRider = async () => {
@@ -229,6 +264,19 @@ export default function RidersPage() {
                 value={hours}
                 onChange={(event) => setHours(event.target.value)}
               />
+            </label>
+
+            <label className="text-sm font-semibold">
+              Terrain Rides
+              <input
+                type="number"
+                min="0"
+                step="1"
+                className="stable-input mt-2"
+                value={terrainRides}
+                onChange={(event) => setTerrainRides(event.target.value)}
+              />
+              <p className="mt-2 text-xs text-stable-ink/60">€50 per terrain ride.</p>
             </label>
 
             <label className="text-sm font-semibold">

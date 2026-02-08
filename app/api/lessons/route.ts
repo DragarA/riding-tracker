@@ -31,7 +31,10 @@ export async function POST(request: Request) {
     const body = await request.json();
     const hours = Number(body.hours ?? 0);
     const rateAtTime = Number(body.rateAtTime ?? 0);
-    const totalOwed = Number((hours * rateAtTime).toFixed(2));
+    const terrainRidesRaw = Number(body.terrainRides ?? 0);
+    const terrainRides = Number.isFinite(terrainRidesRaw) ? Math.max(0, Math.trunc(terrainRidesRaw)) : 0;
+    const terrainTotal = terrainRides * 50;
+    const totalOwed = Number((hours * rateAtTime + terrainTotal).toFixed(2));
     const month = Number(body.month);
     const year = Number(body.year);
     const now = new Date();
@@ -43,6 +46,7 @@ export async function POST(request: Request) {
         clientId: body.clientId,
         hours,
         rateAtTime,
+        terrainRides,
         totalOwed,
         month: resolvedMonth,
         year: resolvedYear,

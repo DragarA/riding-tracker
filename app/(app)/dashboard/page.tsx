@@ -11,6 +11,7 @@ interface LessonLog {
   hours: number;
   totalOwed: number;
   paid: boolean;
+  terrainRides: number;
   client: { name: string };
 }
 
@@ -18,6 +19,7 @@ interface BoardingLog {
   id: string;
   totalOwed: number;
   paid: boolean;
+  notes: string | null;
   client: { name: string };
 }
 
@@ -30,6 +32,8 @@ interface ActivityRow {
   id: string;
   name: string;
   hours: number | null;
+  terrainRides: number;
+  notes: string | null;
   total: number;
   type: "Lesson" | "Boarding";
   paid: boolean;
@@ -44,6 +48,38 @@ export default function DashboardPage() {
   const [expenses, setExpenses] = useState<ExpenseLog[]>([]);
   const [status, setStatus] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "paid" | "unpaid">("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | "lesson" | "boarding">("all");
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem("shared-month-year");
+    if (!saved) {
+      setFiltersLoaded(true);
+      return;
+    }
+    try {
+      const parsed = JSON.parse(saved);
+      const savedMonth = Number(parsed?.month);
+      const savedYear = Number(parsed?.year);
+      if (Number.isFinite(savedMonth) && Number.isFinite(savedYear)) {
+        setMonth(savedMonth);
+        setYear(savedYear);
+      }
+    } catch {
+      // ignore invalid storage
+    }
+    setFiltersLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!filtersLoaded) {
+      return;
+    }
+    window.localStorage.setItem(
+      "shared-month-year",
+      JSON.stringify({ month, year })
+    );
+  }, [month, year, filtersLoaded]);
 
   useEffect(() => {
     const load = async () => {
@@ -71,11 +107,17 @@ export default function DashboardPage() {
     [lessons]
   );
 
-  const projectedRevenue = useMemo(() => {
-    const lessonTotal = lessons.reduce((sum, entry) => sum + Number(entry.totalOwed || 0), 0);
-    const boardingTotal = boarding.reduce((sum, entry) => sum + Number(entry.totalOwed || 0), 0);
-    return lessonTotal + boardingTotal;
-  }, [lessons, boarding]);
+  const lessonRevenue = useMemo(
+    () => lessons.reduce((sum, entry) => sum + Number(entry.totalOwed || 0), 0),
+    [lessons]
+  );
+
+  const boardingRevenue = useMemo(
+    () => boarding.reduce((sum, entry) => sum + Number(entry.totalOwed || 0), 0),
+    [boarding]
+  );
+
+  const projectedRevenue = useMemo(() => lessonRevenue + boardingRevenue, [lessonRevenue, boardingRevenue]);
 
   const expenseTotal = useMemo(
     () => expenses.reduce((sum, entry) => sum + Number(entry.cost || 0), 0),
@@ -89,6 +131,8 @@ export default function DashboardPage() {
       id: entry.id,
       name: entry.client.name,
       hours: entry.hours,
+      terrainRides: entry.terrainRides ?? 0,
+      notes: null,
       total: entry.totalOwed,
       type: "Lesson",
       paid: entry.paid
@@ -98,23 +142,36 @@ export default function DashboardPage() {
       id: entry.id,
       name: entry.client.name,
       hours: null,
+      terrainRides: 0,
+      notes: entry.notes ?? null,
       total: entry.totalOwed,
       type: "Boarding",
       paid: entry.paid
     }));
 
-    return [...lessonRows, ...boardingRows].sort((a, b) => a.name.localeCompare(b.name));
+    return [...lessonRows, ...boardingRows].sort((a, b) => {
+      if (a.type !== b.type) {
+        return a.type === "Lesson" ? -1 : 1;
+      }
+      return a.name.localeCompare(b.name);
+    });
   }, [lessons, boarding]);
 
   const filteredRows = useMemo(() => {
+    let rows = activityRows;
     if (filter === "paid") {
-      return activityRows.filter((row) => row.paid);
+      rows = rows.filter((row) => row.paid);
+    } else if (filter === "unpaid") {
+      rows = rows.filter((row) => !row.paid);
     }
-    if (filter === "unpaid") {
-      return activityRows.filter((row) => !row.paid);
+
+    if (typeFilter === "lesson") {
+      rows = rows.filter((row) => row.type === "Lesson");
+    } else if (typeFilter === "boarding") {
+      rows = rows.filter((row) => row.type === "Boarding");
     }
-    return activityRows;
-  }, [activityRows, filter]);
+    return rows;
+  }, [activityRows, filter, typeFilter]);
 
   const handleDelete = async (row: ActivityRow) => {
     const confirmed = window.confirm(`Delete this ${row.type.toLowerCase()} entry for ${row.name}?`);
@@ -167,7 +224,17 @@ export default function DashboardPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total Hours" value={`${totalHours.toFixed(1)} hrs`} note="Riding lesson time logged." />
-        <StatCard label="Projected Revenue" value={`€${projectedRevenue.toFixed(2)}`} note="Lessons + boarding for selected month." />
+        <StatCard
+          label="Projected Revenue"
+          value={`€${projectedRevenue.toFixed(2)}`}
+          note="Lessons + boarding for selected month."
+          details={[
+            `Lessons: €${lessonRevenue.toFixed(2)}`,
+            `Boarders: €${boardingRevenue.toFixed(2)}`
+          ]}
+          detailsInline
+          detailsClassName="font-semibold text-stable-ink"
+        />
         <StatCard label="Expenses" value={`€${expenseTotal.toFixed(2)}`} note="Monthly costs logged in expenses." />
         <StatCard label="Net Profit" value={`€${netProfit.toFixed(2)}`} note="Revenue minus expenses for the month." />
       </div>
@@ -186,6 +253,15 @@ export default function DashboardPage() {
               <option value="paid">Paid</option>
               <option value="unpaid">Unpaid</option>
             </select>
+            <select
+              className="stable-input h-9 text-xs uppercase tracking-wide"
+              value={typeFilter}
+              onChange={(event) => setTypeFilter(event.target.value as typeof typeFilter)}
+            >
+              <option value="all">All Types</option>
+              <option value="lesson">Riders</option>
+              <option value="boarding">Boarders</option>
+            </select>
           </div>
         </div>
         {status ? <p className="mt-2 text-xs text-stable-forest">{status}</p> : null}
@@ -196,6 +272,7 @@ export default function DashboardPage() {
                 <th className="pb-3">Client</th>
                 <th className="pb-3">Type</th>
                 <th className="pb-3">Hours</th>
+                <th className="pb-3">Notes</th>
                 <th className="pb-3">Total Owed</th>
                 <th className="pb-3 text-right">Actions</th>
               </tr>
@@ -203,7 +280,7 @@ export default function DashboardPage() {
             <tbody>
               {filteredRows.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-6 text-center text-sm text-stable-ink/60">
+                  <td colSpan={6} className="py-6 text-center text-sm text-stable-ink/60">
                     No activity logged for this month yet.
                   </td>
                 </tr>
@@ -215,7 +292,14 @@ export default function DashboardPage() {
                   >
                     <td className="py-3 font-semibold">{row.name}</td>
                     <td className="py-3">{row.type}</td>
-                    <td className="py-3">{row.hours ? row.hours.toFixed(1) : "-"}</td>
+                    <td className="py-3">
+                      {row.type === "Lesson" && row.hours !== null
+                        ? row.terrainRides > 0
+                          ? `${Math.round(row.hours)} hours + ${row.terrainRides} terrains`
+                          : `${Math.round(row.hours)} hours`
+                        : "-"}
+                    </td>
+                    <td className="py-3">{row.notes ? row.notes : "-"}</td>
                     <td className="py-3 font-semibold">€{row.total.toFixed(2)}</td>
                     <td className="py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
