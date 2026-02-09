@@ -59,6 +59,28 @@ export default function ExpensesPage() {
   }, []);
 
   useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== "shared-month-year" || !event.newValue) {
+        return;
+      }
+      try {
+        const parsed = JSON.parse(event.newValue);
+        const savedMonth = Number(parsed?.month);
+        const savedYear = Number(parsed?.year);
+        if (Number.isFinite(savedMonth) && Number.isFinite(savedYear)) {
+          setMonth(savedMonth);
+          setYear(savedYear);
+        }
+      } catch {
+        // ignore invalid storage
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  useEffect(() => {
     if (!filtersLoaded) {
       return;
     }

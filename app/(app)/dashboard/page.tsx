@@ -72,6 +72,28 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key !== "shared-month-year" || !event.newValue) {
+        return;
+      }
+      try {
+        const parsed = JSON.parse(event.newValue);
+        const savedMonth = Number(parsed?.month);
+        const savedYear = Number(parsed?.year);
+        if (Number.isFinite(savedMonth) && Number.isFinite(savedYear)) {
+          setMonth(savedMonth);
+          setYear(savedYear);
+        }
+      } catch {
+        // ignore invalid storage
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  useEffect(() => {
     if (!filtersLoaded) {
       return;
     }
@@ -240,10 +262,9 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-8 stable-card p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h3 className="text-lg font-semibold">Monthly Activity</h3>
-          <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.2em] text-stable-saddle">
-            <span>Name · Hours · Total</span>
+          <div className="flex items-center gap-3 text-xs uppercase tracking-[0.2em] text-stable-saddle">
             <select
               className="stable-input h-9 text-xs uppercase tracking-wide"
               value={filter}
@@ -254,7 +275,7 @@ export default function DashboardPage() {
               <option value="unpaid">Unpaid</option>
             </select>
             <select
-              className="stable-input h-9 text-xs uppercase tracking-wide"
+              className="stable-input h-9 min-w-[140px] text-xs uppercase tracking-wide"
               value={typeFilter}
               onChange={(event) => setTypeFilter(event.target.value as typeof typeFilter)}
             >
